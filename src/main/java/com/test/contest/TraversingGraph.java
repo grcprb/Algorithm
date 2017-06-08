@@ -2,8 +2,7 @@ package com.test.contest;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -131,25 +130,30 @@ public class TraversingGraph {
 			}
 		}
 
-		Iterator l_itr1 = l_employeeMap.entrySet().iterator();
-		while (l_itr1.hasNext()) {
-			Map.Entry<String, TreeSet<Employee>> l_empVal = (Map.Entry<String, TreeSet<Employee>>) l_itr1.next();
-			TreeSet<Employee> l_emplist = l_empVal.getValue();
-			Object[] l_empArr = l_emplist.toArray();
-			for (int i = 0; i < l_empArr.length; i++) {
-				String l_finalValue = "";
-				l_finalValue = l_finalValue + ((Employee) l_empArr[i]).designation;
-				Object[] l_joblist = ((Employee) l_empArr[i]).jobList.toArray();
-				for (int j = 0; j < l_joblist.length; j++) {
-					l_finalValue = l_finalValue + "#" + ((Job) l_joblist[j]).jobid;
-				}
+		TreeSet<Employee> allEMP = new TreeSet<>(new Comparator<Employee>() {
 
-				l_outputArr.add(l_finalValue);
+			@Override
+			public int compare(Employee o1, Employee o2) {
+				return o1.designation.compareTo(o2.designation);
 			}
+		});
+		for (Iterator<Entry<String, TreeSet<Employee>>> iterator = l_employeeMap.entrySet().iterator(); iterator.hasNext();) {
+			Map.Entry<String, TreeSet<Employee>> pair = (Map.Entry<String, TreeSet<Employee>>) iterator.next();
+			String l_key = (String) pair.getKey();
+			TreeSet<Employee> l_empList = (TreeSet<Employee>) pair.getValue();
+			allEMP.addAll(l_empList);
 		}
-		Collections.sort(l_outputArr);
-		Object[] objectList = l_outputArr.toArray();
-		return Arrays.copyOf(objectList, objectList.length, String[].class);
+
+		for (Employee employee : allEMP) {
+			String desig = employee.designation;
+			for (Job job : employee.jobList) {
+				desig += "#" + job.jobid;
+			}
+			l_outputArr.add(desig);
+		}
+		String[] result = new String[l_outputArr.size()];
+		result = l_outputArr.toArray(result);
+		return result;
 	}
 }
 
@@ -217,28 +221,5 @@ class Employee implements Comparable<Employee> {
 	@Override
 	public String toString() {
 		return "Employee [designation=" + designation + ", skill=" + skill + ", jobList=" + jobList + ", totalhours=" + totalhours + "]";
-	}
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((designation == null) ? 0 : designation.hashCode());
-		result = prime * result + ((skill == null) ? 0 : skill.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Employee other = (Employee) obj;
-		if (this.designation.equals(other.designation))
-			return true;
-		return false;
 	}
 }
